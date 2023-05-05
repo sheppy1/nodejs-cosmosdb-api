@@ -44,9 +44,11 @@ app.post('/items', async (req, res) => {
 // Get all items
 app.get('/items', async (req, res) => {
   try {
-    // Get the database and container objects
-    const { database } = await client.databases.get({ id: databaseId });
-    const { container } = await database.containers.get({ id: containerId });
+    // Create the database if it doesn't exist
+    const { database } = await client.databases.createIfNotExists({ id: databaseId });
+
+    // Create the container if it doesn't exist
+    const { container } = await database.containers.createIfNotExists({ id: containerId });
 
     // Query for all items in the container
     const querySpec = {
@@ -63,9 +65,11 @@ app.get('/items', async (req, res) => {
 // Get a specific item by ID
 app.get('/items/:id', async (req, res) => {
   try {
-    // Get the database and container objects
-    const { database } = await client.databases.get({ id: databaseId });
-    const { container } = await database.containers.get({ id: containerId });
+    // Create the database if it doesn't exist
+    const { database } = await client.databases.createIfNotExists({ id: databaseId });
+
+    // Create the container if it doesn't exist
+    const { container } = await database.containers.createIfNotExists({ id: containerId });
 
     // Query for the item with the specified ID
     const querySpec = {
@@ -93,9 +97,11 @@ app.get('/items/:id', async (req, res) => {
 // Update an item by ID
 app.put('/items/:id', async (req, res) => {
   try {
-    // Get the database and container objects
-    const { database } = await client.databases.get({ id: databaseId });
-    const { container } = await database.containers.get({ id: containerId });
+    // Create the database if it doesn't exist
+    const { database } = await client.databases.createIfNotExists({ id: databaseId });
+
+    // Create the container if it doesn't exist
+    const { container } = await database.containers.createIfNotExists({ id: containerId });
 
     // Query for the item with the specified ID
     const querySpec = {
@@ -129,9 +135,11 @@ app.put('/items/:id', async (req, res) => {
 // Delete an item by ID
 app.delete('/items/:id', async (req, res) => {
   try {
-    // Get the database and container objects
-    const { database } = await client.databases.get({ id: databaseId });
-    const { container } = await database.containers.get({ id: containerId });
+    // Create the database if it doesn't exist
+    const { database } = await client.databases.createIfNotExists({ id: databaseId });
+
+    // Create the container if it doesn't exist
+    const { container } = await database.containers.createIfNotExists({ id: containerId });
 
     // Query for the item with the specified ID
     const querySpec = {
