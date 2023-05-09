@@ -12,10 +12,6 @@ const aadCredentials = new ManagedIdentityCredential();
 
 // Replace with your Cosmos DB endpoint and key
 const endpoint = 'https://ds-cosmosdb.documents.azure.com:443/';
-// const key = 'Kjn8SbJaUGRJSsjyy78f2j11CJX947dP9IitXBAs68aGX0Is85BlDI8CXTsE5rjeoP42zW0IXJHKACDb5zB9TQ==';
-
-// Create a new instance of DefaultAzureCredential for authentication
-// const credential = new DefaultAzureCredential();
 
 // Replace with your database and container names
 const databaseId = 'dstestdb';
