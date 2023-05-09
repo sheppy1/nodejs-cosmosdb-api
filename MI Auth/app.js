@@ -1,23 +1,32 @@
 // Import the CosmosClient class from the @azure/cosmos package
-const CosmosClient = require('@azure/cosmos').CosmosClient;
+const { CosmosClient } = require("@azure/cosmos");
+
+// Import the AAD Auth class from the @azure/identity package
+const { ManagedIdentityCredential, DefaultAzureCredential } = require('@azure/identity');
 
 // Import the Express class from the express package
 const express = require('express');
 
-// Replace with your Cosmos DB endpoint and key
-const endpoint = 'DB_URI_HERE;
-const key = 'KEY_HERE';
+// Create a new instance of ManagedIdentityCredential, to be used for MI, AAD Auth with a CosmosClient Instance
+const aadCredentials = new ManagedIdentityCredential();
 
-// Create a new CosmosClient instance with the endpoint and key
-const client = new CosmosClient({ endpoint, key });
+// Replace with your Cosmos DB endpoint and key
+const endpoint = 'https://ds-cosmosdb.documents.azure.com:443/';
+// const key = 'Kjn8SbJaUGRJSsjyy78f2j11CJX947dP9IitXBAs68aGX0Is85BlDI8CXTsE5rjeoP42zW0IXJHKACDb5zB9TQ==';
+
+// Create a new instance of DefaultAzureCredential for authentication
+// const credential = new DefaultAzureCredential();
+
+// Replace with your database and container names
+const databaseId = 'dstestdb';
+const containerId = 'dstestcont';
+
+// Create a new instance of CosmosClient with managed identity authentication
+const client = new CosmosClient({endpoint, aadCredentials});
 
 // Create a new Express instance
 const app = express();
 app.use(express.json());
-
-// Replace with your database and container names
-const databaseId = 'DB_NAME_HERE';
-const containerId = 'CONTAINER_NAME_HERE';
 
 app.listen(3000, () => {
   console.log('App listening on port 3000');
@@ -58,7 +67,7 @@ app.get('/items', async (req, res) => {
     res.json(items);
   } catch (error) {
     console.error(error);
-    res.status(500).send('Error getting items from container');
+    res.status(500).send(`Error getting items from container with ${error}`);
   }
 });
 
