@@ -11,7 +11,7 @@ const express = require('express');
 const aadCredentials = new ManagedIdentityCredential();
 
 // Replace with your Cosmos DB endpoint (in Dockerfile)
-const endpoint = process.env.COSMOS_ENDPOINT;
+const endpoint = process.env.COSMOS_DB_ENDPOINT;
 
 // Replace with your database and container names (in Dockerfile)
 const databaseId = process.env.COSMOS_DB_ID;
