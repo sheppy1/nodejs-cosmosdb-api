@@ -28,9 +28,6 @@ app.listen(3000, () => {
   console.log('App listening on port 3000');
 });
 
-// Import the CosmosClient class from the @azure/cosmos package
-const { CosmosClient } = require("@azure/cosmos");
-
 // Import the AAD Auth class from the @azure/identity package
 const { ManagedIdentityCredential, DefaultAzureCredential } = require('@azure/identity');
 
