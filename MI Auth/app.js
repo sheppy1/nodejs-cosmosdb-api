@@ -28,8 +28,34 @@ app.listen(3000, () => {
   console.log('App listening on port 3000');
 });
 
+// Import the CosmosClient class from the @azure/cosmos package
+const { CosmosClient } = require("@azure/cosmos");
+
+// Import the AAD Auth class from the @azure/identity package
+const { ManagedIdentityCredential, DefaultAzureCredential } = require('@azure/identity');
+
+// Import the Express class from the express package
+const express = require('express');
+
+app.listen(3000, () => {
+  console.log('App listening on port 3000');
+});
+
+// Middleware function to handle errors
+app.use((err, res) => {
+  console.error(err.stack);
+
+  if (err.statusCode === 401) {
+    res.status(401).send('Unauthorized');
+  } else if (err.statusCode === 403) {
+    res.status(403).send('Forbidden');
+  } else {
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 // Insert an item
-app.post('/items', async (req, res) => {
+app.post('/items', async (req, res, next) => {
   try {
     // Create the database if it doesn't exist
     const { database } = await client.databases.createIfNotExists({ id: databaseId });
@@ -41,13 +67,12 @@ app.post('/items', async (req, res) => {
     const { resource: createdItem } = await container.items.create(req.body);
     res.json(createdItem);
   } catch (error) {
-    console.error(error);
-    res.status(500).send('Error inserting item into container');
+    next(error);
   }
 });
 
 // Get all items
-app.get('/items', async (req, res) => {
+app.get('/items', async (req, res, next) => {
   try {
     // Create the database if it doesn't exist
     const { database } = await client.databases.createIfNotExists({ id: databaseId });
@@ -62,13 +87,12 @@ app.get('/items', async (req, res) => {
     const { resources: items } = await container.items.query(querySpec).fetchAll();
     res.json(items);
   } catch (error) {
-    console.error(error);
-    res.status(500).send(`Error getting items from container with ${error}`);
+    next(error);
   }
 });
 
 // Get a specific item by ID
-app.get('/items/:id', async (req, res) => {
+app.get('/items/:id', async (req, res, next) => {
   try {
     // Create the database if it doesn't exist
     const { database } = await client.databases.createIfNotExists({ id: databaseId });
@@ -94,13 +118,12 @@ app.get('/items/:id', async (req, res) => {
       res.status(404).send(`Item with ID ${req.params.id} not found`);
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).send(`Error getting item with ID ${req.params.id}`);
+    next(error);
   }
 });
 
 // Update an item by ID
-app.put('/items/:id', async (req, res) => {
+app.put('/items/:id', async (req, res, next) => {
   try {
     // Create the database if it doesn't exist
     const { database } = await client.databases.createIfNotExists({ id: databaseId });
@@ -132,13 +155,12 @@ app.put('/items/:id', async (req, res) => {
       res.status(404).send(`Item with ID ${req.params.id} not found`);
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).send(`Error updating item with ID ${req.params.id}`);
+    next(error);
   }
 });
 
 // Delete an item by ID
-app.delete('/items/:id', async (req, res) => {
+app.delete('/items/:id', async (req, res, next) => {
   try {
     // Create the database if it doesn't exist
     const { database } = await client.databases.createIfNotExists({ id: databaseId });
@@ -166,7 +188,6 @@ app.delete('/items/:id', async (req, res) => {
       res.status(404).send(`Item with ID ${req.params.id} not found`);
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).send(`Error deleting item with ID ${req.params.id}`);
+    next(error);
   }
 });
