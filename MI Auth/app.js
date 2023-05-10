@@ -10,12 +10,12 @@ const express = require('express');
 // Create a new instance of ManagedIdentityCredential, to be used for MI, AAD Auth with a CosmosClient Instance
 const aadCredentials = new ManagedIdentityCredential();
 
-// Replace with your Cosmos DB endpoint and key
-const endpoint = 'https://ds-cosmosdb.documents.azure.com:443/';
+// Replace with your Cosmos DB endpoint (in Dockerfile)
+const endpoint = process.env.COSMOS_ENDPOINT;
 
-// Replace with your database and container names
-const databaseId = 'dstestdb';
-const containerId = 'dstestcont';
+// Replace with your database and container names (in Dockerfile)
+const databaseId = process.env.COSMOS_DB_ID;
+const containerId = process.env.COSMOS_CONTAINER_ID;
 
 // Create a new instance of CosmosClient with managed identity authentication
 const client = new CosmosClient({endpoint, aadCredentials});

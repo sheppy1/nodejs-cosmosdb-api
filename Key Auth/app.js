@@ -4,9 +4,13 @@ const CosmosClient = require('@azure/cosmos').CosmosClient;
 // Import the Express class from the express package
 const express = require('express');
 
-// Replace with your Cosmos DB endpoint and key
-const endpoint = 'DB_URI_HERE'
-const key = 'KEY_HERE';
+// Replace with your Cosmos DB endpoint (in Dockerfile)
+const endpoint = process.env.COSMOS_ENDPOINT;
+
+// Replace with your database and container names (in Dockerfile)
+const databaseId = process.env.COSMOS_DB_ID;
+const containerId = process.env.COSMOS_CONTAINER_ID;
+const key = process.env.COSMOS_ACCESS_KEY;
 
 // Create a new CosmosClient instance with the endpoint and key
 const client = new CosmosClient({ endpoint, key });
@@ -14,10 +18,6 @@ const client = new CosmosClient({ endpoint, key });
 // Create a new Express instance
 const app = express();
 app.use(express.json());
-
-// Replace with your database and container names
-const databaseId = 'DB_NAME_HERE';
-const containerId = 'CONTAINER_NAME_HERE';
 
 app.listen(3000, () => {
   console.log('App listening on port 3000');
