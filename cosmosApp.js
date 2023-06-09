@@ -1,36 +1,44 @@
-const { CosmosClient } = require("@azure/cosmos");
+const { TableClient } = require("@azure/data-tables");
 const { AzureCliCredential } = require("@azure/identity");
+const base64 = require("base64-js");
 
 async function main() {
   const endpoint = "<your-cosmosdb-endpoint>";
   const credential = new AzureCliCredential();
-  const client = new CosmosClient({ endpoint, credential });
+  const sasToken = await generateSasToken(credential);
 
-  const databaseId = "<your-database-id>";
-  const containerId = "<your-container-id>";
+  const encodedSasToken = encodeSasToken(sasToken);
+  const connectionString = `AccountKey=${encodedSasToken};TableEndpoint=${endpoint}`;
 
-  const database = client.database(databaseId);
-  const container = database.container(containerId);
+  const tableClient = new TableClient(connectionString, "<your-table-name>");
 
-  // Create a sample container
-  await createContainerIfNotExists(container);
+  const tableName = "sampleTable";
+  await createTableIfNotExists(tableClient, tableName);
 
-  console.log("Created container:", containerId);
+  console.log("Created table:", tableName);
 
-  // List all containers
-  const { resources: containers } = await database.containers.readAll().fetchAll();
-
-  console.log("Containers:");
-  containers.forEach((container) => {
-    console.log(container.id);
+  // List all tables
+  const tables = await tableClient.listTables();
+  console.log("Tables:");
+  tables.forEach((table) => {
+    console.log(table.tableName);
   });
 }
 
-async function createContainerIfNotExists(container) {
-  const { resource: existingContainer } = await container.read();
-  if (!existingContainer) {
-    await container.create();
-  }
+async function createTableIfNotExists(client, tableName) {
+  const response = await client.createTable(tableName);
+  return response._response.status === 201;
+}
+
+function encodeSasToken(sasToken) {
+  const encodedBytes = base64.fromByteArray(new TextEncoder().encode(sasToken));
+  return encodedBytes;
+}
+
+async function generateSasToken(credential) {
+  const token = await credential.getToken("https://management.azure.com/.default");
+  const authString = `Bearer ${token.token}`;
+  return authString;
 }
 
 main().catch((error) => {
