@@ -1,16 +1,12 @@
-const { TableClient } = require("@azure/data-tables");
+const { TableClient, generateAccountSASQueryParameters } = require("@azure/data-tables");
 const { AzureCliCredential } = require("@azure/identity");
-const base64 = require("base64-js");
 
 async function main() {
   const endpoint = "<your-cosmosdb-endpoint>";
   const credential = new AzureCliCredential();
-  const sasToken = await generateSasToken(credential);
 
-  const encodedSasToken = encodeSasToken(sasToken);
-  const connectionString = `AccountKey=${encodedSasToken};TableEndpoint=${endpoint}`;
-
-  const tableClient = new TableClient(connectionString, "<your-table-name>");
+  const sasToken = await generateSasToken(endpoint, credential);
+  const tableClient = new TableClient(`${endpoint}?${sasToken}`);
 
   const tableName = "sampleTable";
   await createTableIfNotExists(tableClient, tableName);
@@ -30,15 +26,25 @@ async function createTableIfNotExists(client, tableName) {
   return response._response.status === 201;
 }
 
-function encodeSasToken(sasToken) {
-  const encodedBytes = base64.fromByteArray(new TextEncoder().encode(sasToken));
-  return encodedBytes;
-}
+async function generateSasToken(endpoint, credential) {
+  const accountSAS = generateAccountSASQueryParameters(
+    {
+      startsOn: new Date(),
+      expiresOn: new Date(new Date().valueOf() + 86400),
+      permissions: {
+        read: true,
+        write: true,
+        delete: true,
+        list: true,
+      },
+      services: "t",
+      resourceTypes: "s",
+    },
+    credential
+  );
 
-async function generateSasToken(credential) {
-  const token = await credential.getToken("https://management.azure.com/.default");
-  const authString = `Bearer ${token.token}`;
-  return authString;
+  const sasToken = accountSAS.toString();
+  return sasToken;
 }
 
 main().catch((error) => {
