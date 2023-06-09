@@ -1,5 +1,6 @@
 const { TableClient } = require("@azure/data-tables");
 const { AzureCliCredential } = require("@azure/identity");
+const base64 = require("base64-js");
 
 async function main() {
   const endpoint = "<your-cosmosdb-endpoint>";
@@ -24,6 +25,20 @@ async function createTableIfNotExists(client, tableName) {
   return response._response.status === 201;
 }
 
-main().catch((error) => {
-  console.error("Error running the application:", error);
-});
+function encodeAuthString(authString) {
+  const encodedBytes = base64.fromByteArray(new TextEncoder().encode(authString));
+  return encodedBytes;
+}
+
+(async () => {
+  try {
+    const credential = new AzureCliCredential();
+    const token = await credential.getToken("https://management.azure.com/.default");
+    const authString = `Bearer ${token.token}`;
+    const encodedAuthString = encodeAuthString(authString);
+    process.env.AZURE_TABLES_SAS_TOKEN = encodedAuthString;
+    await main();
+  } catch (error) {
+    console.error("Error running the application:", error);
+  }
+})();
