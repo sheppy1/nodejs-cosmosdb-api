@@ -1,33 +1,28 @@
-const { CosmosClient } = require("@azure/cosmos");
+const { TableServiceClient } = require("@azure/cosmos");
+const { DefaultAzureCredential } = require("@azure/identity");
 
 async function main() {
   const endpoint = "<your-cosmosdb-endpoint>";
-  const key = "<your-cosmosdb-key>";
-  const databaseId = "<your-database-id>";
-  const containerId = "<your-container-id>";
+  const credential = new DefaultAzureCredential();
+  const client = new TableServiceClient(endpoint, credential);
 
-  const client = new CosmosClient({ endpoint, key });
-  const database = client.database(databaseId);
-  const container = database.container(containerId);
+  const tableName = "sampleTable";
+  await createTableIfNotExists(client, tableName);
 
-  // Create a sample entity
-  const sampleEntity = {
-    partitionKey: "partitionKey",
-    rowKey: "rowKey",
-    data: "sampleData",
-  };
-  await container.items.create(sampleEntity);
+  console.log("Created table:", tableName);
 
-  console.log("Created sample entity.");
+  // List all tables
+  const tablesIterator = client.listTables();
+  const tables = [];
+  for await (const table of tablesIterator) {
+    tables.push(table.name);
+  }
+  console.log("Tables:", tables);
+}
 
-  // Query all entities in the container
-  const query = "SELECT * FROM c";
-  const { resources: entities } = await container.items.query(query).fetchAll();
-
-  console.log("Entities:");
-  entities.forEach((entity) => {
-    console.log(entity);
-  });
+async function createTableIfNotExists(client, tableName) {
+  const response = await client.createTable(tableName);
+  return response._response.status === 201;
 }
 
 main().catch((error) => {
