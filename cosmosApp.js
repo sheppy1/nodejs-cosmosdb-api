@@ -1,6 +1,5 @@
 const { TableClient } = require("@azure/data-tables");
 const { AzureCliCredential } = require("@azure/identity");
-const axios = require("axios");
 
 async function main() {
   const endpoint = "<your-cosmosdb-endpoint>";
@@ -25,17 +24,6 @@ async function createTableIfNotExists(client, tableName) {
   return response._response.status === 201;
 }
 
-async function getSasToken() {
-  const response = await axios.get("http://localhost:26783/token/AzureCliCredential");
-  return response.data.token;
-}
-
-(async () => {
-  try {
-    const token = await getSasToken();
-    process.env.AZURE_TABLES_SAS_TOKEN = token;
-    await main();
-  } catch (error) {
-    console.error("Error running the application:", error);
-  }
-})();
+main().catch((error) => {
+  console.error("Error running the application:", error);
+});
